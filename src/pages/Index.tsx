@@ -341,6 +341,17 @@ const Index = () => {
         })}
       </main>
 
+      {/* Quote banner */}
+      <section className="py-14 bg-gradient-to-r from-primary/10 via-accent/30 to-primary/10">
+        <div className="container flex flex-col items-center text-center">
+          <Icon name="Quote" size={36} className="mb-4 text-primary opacity-60" />
+          <blockquote className="max-w-2xl font-display text-3xl leading-snug text-primary md:text-4xl">
+            «Я люблю тебя дальше Солнца, Луны и звёзд»
+          </blockquote>
+          <p className="mt-4 text-base text-muted-foreground italic">— говорила она мне</p>
+        </div>
+      </section>
+
       {/* Questions section for readers */}
       <section id="questions" className="bg-secondary/40 py-16">
         <div className="container">
