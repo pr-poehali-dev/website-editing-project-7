@@ -428,6 +428,7 @@ const Index = () => {
               {editingId !== null ? 'Редактирование поста' : 'Новый пост'}
             </DialogTitle>
           </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <div className="space-y-4 py-2">
             <div>
               <label className="mb-1.5 block text-sm font-medium">Имя автора</label>
@@ -482,11 +483,12 @@ const Index = () => {
             )}
           </div>
           <DialogFooter>
-            <Button onClick={handleSubmit} className="w-full rounded-full gap-2" size="lg">
+            <Button type="submit" className="w-full rounded-full gap-2" size="lg">
               <Icon name="Send" size={18} />
               {editingId !== null ? 'Сохранить изменения' : 'Отправить на модерацию'}
             </Button>
           </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
