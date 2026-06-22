@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -16,12 +15,15 @@ import { useToast } from '@/hooks/use-toast';
 const HERO_IMAGE =
   'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/8a8d0940-3183-4d02-9e0d-67b0ac823dca.jpg';
 
+const LOGO_IMAGE =
+  'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/beddb1c4-1163-4999-adbf-c5fd6f755b54.jpg';
+
 const CATEGORIES = [
-  { id: 'care', label: 'Уход за ребёнком', icon: 'Baby', color: 'bg-rose-100 text-rose-700' },
-  { id: 'health', label: 'Здоровье', icon: 'HeartPulse', color: 'bg-emerald-100 text-emerald-700' },
-  { id: 'development', label: 'Развитие', icon: 'Sparkles', color: 'bg-violet-100 text-violet-700' },
-  { id: 'nutrition', label: 'Питание', icon: 'Apple', color: 'bg-amber-100 text-amber-700' },
-  { id: 'treatment', label: 'Лечение ребёнка', icon: 'Stethoscope', color: 'bg-sky-100 text-sky-700' },
+  { id: 'care', label: 'Уход за ребёнком', icon: 'Baby', color: 'bg-lime-100 text-lime-700' },
+  { id: 'health', label: 'Здоровье', icon: 'HeartPulse', color: 'bg-lime-100 text-lime-700' },
+  { id: 'development', label: 'Развитие', icon: 'Sparkles', color: 'bg-lime-100 text-lime-700' },
+  { id: 'nutrition', label: 'Питание', icon: 'Apple', color: 'bg-lime-100 text-lime-700' },
+  { id: 'treatment', label: 'Лечение ребёнка', icon: 'Stethoscope', color: 'bg-lime-100 text-lime-700' },
 ];
 
 type Post = {
@@ -31,6 +33,13 @@ type Post = {
   title: string;
   content: string;
   status: 'published' | 'pending';
+  date: string;
+};
+
+type Question = {
+  id: number;
+  name: string;
+  text: string;
   date: string;
 };
 
@@ -47,7 +56,7 @@ const INITIAL_POSTS: Post[] = [
   },
   {
     id: 2,
-    author: 'Мария Иванова',
+    author: 'Анна Петрова',
     category: 'nutrition',
     title: 'Первый прикорм без стресса',
     content:
@@ -57,7 +66,7 @@ const INITIAL_POSTS: Post[] = [
   },
   {
     id: 3,
-    author: 'Ольга Смирнова',
+    author: 'Анна Петрова',
     category: 'development',
     title: 'Развивающие игры до года',
     content:
@@ -67,19 +76,35 @@ const INITIAL_POSTS: Post[] = [
   },
 ];
 
+type FormState = { author: string; title: string; category: string; content: string };
+
+const emptyForm: FormState = { author: '', title: '', category: '', content: '' };
+
 const Index = () => {
   const { toast } = useToast();
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    author: '',
-    title: '',
-    category: '',
-    content: '',
-  });
+  const [isAuthor, setIsAuthor] = useState(false);
 
-  const resetForm = () => setForm({ author: '', title: '', category: '', content: '' });
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState<FormState>(emptyForm);
+
+  const [qName, setQName] = useState('');
+  const [qText, setQText] = useState('');
+
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setEditorOpen(true);
+  };
+
+  const openEdit = (post: Post) => {
+    setEditingId(post.id);
+    setForm({ author: post.author, title: post.title, category: post.category, content: post.content });
+    setEditorOpen(true);
+  };
 
   const handleSubmit = () => {
     if (!form.author.trim() || !form.title.trim() || !form.category || !form.content.trim()) {
@@ -91,23 +116,60 @@ const Index = () => {
       return;
     }
 
-    const newPost: Post = {
-      id: Date.now(),
-      author: form.author.trim(),
-      category: form.category,
-      title: form.title.trim(),
-      content: form.content.trim(),
-      status: 'pending',
-      date: 'только что',
-    };
+    if (editingId !== null) {
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === editingId
+            ? {
+                ...p,
+                author: form.author.trim(),
+                title: form.title.trim(),
+                category: form.category,
+                content: form.content.trim(),
+                date: 'обновлено только что',
+              }
+            : p
+        )
+      );
+      toast({ title: 'Пост обновлён ✏️', description: 'Изменения сохранены.' });
+    } else {
+      const newPost: Post = {
+        id: Date.now(),
+        author: form.author.trim(),
+        category: form.category,
+        title: form.title.trim(),
+        content: form.content.trim(),
+        status: 'pending',
+        date: 'только что',
+      };
+      setPosts((prev) => [newPost, ...prev]);
+      toast({
+        title: 'Пост отправлен на модерацию 🚀',
+        description: 'После проверки он появится в общей ленте.',
+      });
+    }
 
-    setPosts((prev) => [newPost, ...prev]);
-    resetForm();
-    setOpen(false);
-    toast({
-      title: 'Пост отправлен на модерацию 🚀',
-      description: 'После проверки он появится в общей ленте.',
-    });
+    setForm(emptyForm);
+    setEditingId(null);
+    setEditorOpen(false);
+  };
+
+  const submitQuestion = () => {
+    if (!qName.trim() || !qText.trim()) {
+      toast({
+        title: 'Заполните поля',
+        description: 'Напишите имя и ваш вопрос.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setQuestions((prev) => [
+      { id: Date.now(), name: qName.trim(), text: qText.trim(), date: 'только что' },
+      ...prev,
+    ]);
+    setQName('');
+    setQText('');
+    toast({ title: 'Спасибо! 💚', description: 'Ваш вопрос опубликован.' });
   };
 
   const visiblePosts = posts.filter(
@@ -122,12 +184,28 @@ const Index = () => {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-lg">
         <div className="container flex items-center justify-between py-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-              <Icon name="Heart" size={20} />
-            </div>
+            <img src={LOGO_IMAGE} alt="Мамоград" className="h-11 w-11 rounded-2xl object-cover shadow-sm" />
             <span className="font-display text-3xl text-primary">Мамоград</span>
           </div>
-          <NewPostButton open={open} setOpen={setOpen} form={form} setForm={setForm} onSubmit={handleSubmit} />
+          <div className="flex items-center gap-2">
+            {isAuthor ? (
+              <>
+                <span className="hidden items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground sm:flex">
+                  <Icon name="BadgeCheck" size={15} /> Режим автора
+                </span>
+                <Button onClick={openCreate} className="rounded-full gap-2">
+                  <Icon name="PenLine" size={16} /> Написать пост
+                </Button>
+                <Button variant="outline" className="rounded-full" onClick={() => setIsAuthor(false)}>
+                  Выйти
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" className="rounded-full gap-2" onClick={() => setIsAuthor(true)}>
+                <Icon name="Lock" size={16} /> Вход для автора
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -138,22 +216,33 @@ const Index = () => {
             <Icon name="Users" size={16} /> Сообщество заботливых мам
           </span>
           <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
-            Делитесь опытом{' '}
-            <span className="font-display text-primary">материнства</span> вместе
+            Всё, что хотите знать{' '}
+            <span className="font-display text-primary">о вашем ребёнке</span>
           </h1>
           <p className="mt-5 max-w-md text-lg text-muted-foreground">
-            Публикуйте посты об уходе, здоровье, развитии и питании малышей. Каждый пост
-            проходит модерацию — в ленте только полезное и доброе.
+            Всё о малыше: уход, здоровье, развитие, питание. Делимся советами, поддержкой и теплом.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <NewPostButton open={open} setOpen={setOpen} form={form} setForm={setForm} onSubmit={handleSubmit} big />
+            {isAuthor ? (
+              <Button size="lg" className="rounded-full gap-2" onClick={openCreate}>
+                <Icon name="PenLine" size={20} /> Написать пост
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                className="rounded-full gap-2"
+                onClick={() => document.getElementById('feed')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                <Icon name="BookOpen" size={20} /> Читать посты
+              </Button>
+            )}
             <Button
               variant="outline"
               size="lg"
               className="rounded-full"
-              onClick={() => document.getElementById('feed')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('questions')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Смотреть ленту
+              Задать вопрос
             </Button>
           </div>
         </div>
@@ -195,11 +284,11 @@ const Index = () => {
       </section>
 
       {/* Posts */}
-      <main className="container grid gap-5 pb-20 pt-4 md:grid-cols-2 lg:grid-cols-3">
+      <main className="container grid gap-5 pb-16 pt-4 md:grid-cols-2 lg:grid-cols-3">
         {visiblePosts.length === 0 && (
           <div className="col-span-full rounded-3xl border border-dashed border-border py-16 text-center text-muted-foreground">
             <Icon name="Inbox" size={40} className="mx-auto mb-3 opacity-50" />
-            В этом разделе пока нет постов. Будьте первой!
+            В этом разделе пока нет постов.
           </div>
         )}
         {visiblePosts.map((post) => {
@@ -233,115 +322,160 @@ const Index = () => {
                   </div>
                   <span className="text-sm font-medium">{post.author}</span>
                 </div>
-                <span className="text-xs text-muted-foreground">{post.date}</span>
+                {isAuthor ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 rounded-full text-primary"
+                    onClick={() => openEdit(post)}
+                  >
+                    <Icon name="Pencil" size={14} /> Изменить
+                  </Button>
+                ) : (
+                  <span className="text-xs text-muted-foreground">{post.date}</span>
+                )}
               </div>
             </article>
           );
         })}
       </main>
 
+      {/* Questions section for readers */}
+      <section id="questions" className="bg-secondary/40 py-16">
+        <div className="container">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="font-display text-4xl leading-tight text-primary md:text-6xl">
+              Задавайте или отвечайте на вопросы, наши дорогие мамочки и папочки! 💚
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+              Здесь можно спросить совета, поделиться переживанием или поддержать друг друга. Мы все вместе!
+            </p>
+          </div>
+
+          <div className="mx-auto mt-10 max-w-2xl rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8">
+            <div className="space-y-4">
+              <Input
+                placeholder="Как вас зовут?"
+                value={qName}
+                onChange={(e) => setQName(e.target.value)}
+              />
+              <Textarea
+                placeholder="Ваш вопрос или сообщение..."
+                rows={4}
+                value={qText}
+                onChange={(e) => setQText(e.target.value)}
+              />
+              <Button onClick={submitQuestion} className="w-full rounded-full gap-2" size="lg">
+                <Icon name="Send" size={18} /> Опубликовать вопрос
+              </Button>
+            </div>
+          </div>
+
+          {questions.length > 0 && (
+            <div className="mx-auto mt-8 max-w-2xl space-y-4">
+              {questions.map((q) => (
+                <div
+                  key={q.id}
+                  className="animate-fade-in rounded-3xl border border-border bg-card p-5 shadow-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-foreground">
+                      {q.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-semibold leading-none">{q.name}</p>
+                      <p className="text-xs text-muted-foreground">{q.date}</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 leading-relaxed">{q.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-border bg-secondary/40">
         <div className="container flex flex-col items-center gap-2 py-10 text-center">
           <span className="font-display text-2xl text-primary">Мамоград</span>
           <p className="text-sm text-muted-foreground">
-            Платформа для публикации и обмена постами о материнстве
+            Всё о малыше: уход, здоровье, развитие, питание
           </p>
         </div>
       </footer>
+
+      {/* Post editor (author only) */}
+      <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">
+              {editingId !== null ? 'Редактирование поста' : 'Новый пост'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">Имя автора</label>
+              <Input
+                placeholder="Например, Анна"
+                value={form.author}
+                onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">Заголовок</label>
+              <Input
+                placeholder="О чём ваш пост?"
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">Раздел</label>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, category: cat.id }))}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                      form.category === cat.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/70'
+                    }`}
+                  >
+                    <Icon name={cat.icon} size={14} />
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">Текст поста</label>
+              <Textarea
+                placeholder="Поделитесь своим опытом..."
+                rows={5}
+                value={form.content}
+                onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+              />
+            </div>
+            {editingId === null && (
+              <div className="flex items-center gap-2 rounded-2xl bg-accent/60 p-3 text-sm text-accent-foreground">
+                <Icon name="ShieldCheck" size={18} />
+                Пост появится в ленте после проверки модератором.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSubmit} className="w-full rounded-full gap-2" size="lg">
+              <Icon name="Send" size={18} />
+              {editingId !== null ? 'Сохранить изменения' : 'Отправить на модерацию'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
-
-function NewPostButton({
-  open,
-  setOpen,
-  form,
-  setForm,
-  onSubmit,
-  big,
-}: {
-  open: boolean;
-  setOpen: (v: boolean) => void;
-  form: { author: string; title: string; category: string; content: string };
-  setForm: React.Dispatch<
-    React.SetStateAction<{ author: string; title: string; category: string; content: string }>
-  >;
-  onSubmit: () => void;
-  big?: boolean;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size={big ? 'lg' : 'default'} className="rounded-full gap-2">
-          <Icon name="PenLine" size={big ? 20 : 16} />
-          Написать пост
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Новый пост</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Ваше имя</label>
-            <Input
-              placeholder="Например, Анна"
-              value={form.author}
-              onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Заголовок</label>
-            <Input
-              placeholder="О чём ваш пост?"
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Раздел</label>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, category: cat.id }))}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                    form.category === cat.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/70'
-                  }`}
-                >
-                  <Icon name={cat.icon} size={14} />
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Текст поста</label>
-            <Textarea
-              placeholder="Поделитесь своим опытом..."
-              rows={5}
-              value={form.content}
-              onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-            />
-          </div>
-          <div className="flex items-center gap-2 rounded-2xl bg-accent/60 p-3 text-sm text-accent-foreground">
-            <Icon name="ShieldCheck" size={18} />
-            Пост появится в ленте после проверки модератором.
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={onSubmit} className="w-full rounded-full gap-2" size="lg">
-            <Icon name="Send" size={18} />
-            Отправить на модерацию
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 export default Index;
