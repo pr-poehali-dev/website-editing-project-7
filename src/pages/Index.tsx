@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+
+const POSTS_URL = 'https://functions.poehali.dev/328aae73-db67-44e0-8d0b-6682e707e54a';
 
 const HERO_IMAGE =
   'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/6c262dcc-d0f8-4f14-b585-7e714c676b1d.jpg';
@@ -82,8 +84,16 @@ const emptyForm: FormState = { author: '', title: '', category: '', content: '' 
 
 const Index = () => {
   const { toast } = useToast();
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<Question[]>([]);
+
+  useEffect(() => {
+    fetch(POSTS_URL)
+      .then((r) => r.json())
+      .then((data) => { setPosts(data.posts || INITIAL_POSTS); setLoading(false); })
+      .catch(() => { setPosts(INITIAL_POSTS); setLoading(false); });
+  }, []);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [isAuthor, setIsAuthor] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -121,7 +131,7 @@ const Index = () => {
     setEditorOpen(true);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.title.trim() || !form.category || !form.content.trim()) {
       toast({
         title: 'Заполните все поля',
@@ -130,30 +140,33 @@ const Index = () => {
       });
       return;
     }
-    if (!form.author.trim()) {
-      setForm((f) => ({ ...f, author: 'Автор' }));
-    }
+
+    const author = form.author.trim() || 'Автор';
 
     if (editingId !== null) {
+      await fetch(POSTS_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingId, author, category: form.category, title: form.title.trim(), content: form.content.trim() }),
+      });
       setPosts((prev) =>
         prev.map((p) =>
           p.id === editingId
-            ? {
-                ...p,
-                author: form.author.trim(),
-                title: form.title.trim(),
-                category: form.category,
-                content: form.content.trim(),
-                date: 'обновлено только что',
-              }
+            ? { ...p, author, title: form.title.trim(), category: form.category, content: form.content.trim(), date: 'обновлено только что' }
             : p
         )
       );
       toast({ title: 'Пост обновлён ✏️', description: 'Изменения сохранены.' });
     } else {
+      const res = await fetch(POSTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ author, category: form.category, title: form.title.trim(), content: form.content.trim() }),
+      });
+      const data = await res.json();
       const newPost: Post = {
-        id: Date.now(),
-        author: form.author.trim(),
+        id: data.id,
+        author,
         category: form.category,
         title: form.title.trim(),
         content: form.content.trim(),
@@ -161,10 +174,7 @@ const Index = () => {
         date: 'только что',
       };
       setPosts((prev) => [newPost, ...prev]);
-      toast({
-        title: 'Пост опубликован 💚',
-        description: 'Пост появился в ленте.',
-      });
+      toast({ title: 'Пост опубликован 💚', description: 'Пост сохранён и появился в ленте.' });
     }
 
     setForm(emptyForm);
@@ -301,7 +311,13 @@ const Index = () => {
 
       {/* Posts */}
       <main className="container grid gap-5 pb-16 pt-4 md:grid-cols-2 lg:grid-cols-3">
-        {visiblePosts.length === 0 && (
+        {loading && (
+          <div className="col-span-full py-16 text-center text-muted-foreground">
+            <Icon name="Loader" size={36} className="mx-auto mb-3 animate-spin opacity-50" />
+            Загружаем посты...
+          </div>
+        )}
+        {!loading && visiblePosts.length === 0 && (
           <div className="col-span-full rounded-3xl border border-dashed border-border py-16 text-center text-muted-foreground">
             <Icon name="Inbox" size={40} className="mx-auto mb-3 opacity-50" />
             В этом разделе пока нет постов.
