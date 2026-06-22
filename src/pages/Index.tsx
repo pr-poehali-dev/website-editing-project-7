@@ -254,7 +254,10 @@ const Index = () => {
             </Button>
           </div>
         </div>
-        <div className="animate-scale-in">
+        <div className="animate-scale-in flex flex-col gap-[5rem] md:gap-[5rem]" style={{ gap: '5rem' }}>
+          <blockquote className="rounded-2xl bg-accent/40 px-6 py-5 text-center font-display text-xl leading-snug text-primary md:text-2xl" style={{ marginBottom: 0 }}>
+            «Самый большой подарок, который родители могут сделать своему ребёнку, — это атмосфера любви, потому что в такой атмосфере он развивается лучше всего»
+          </blockquote>
           <div className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-primary/20">
             <img src={HERO_IMAGE} alt="Мама с малышом" className="h-full w-full object-cover" />
           </div>
