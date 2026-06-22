@@ -13,7 +13,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 const HERO_IMAGE =
-  'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/8a8d0940-3183-4d02-9e0d-67b0ac823dca.jpg';
+  'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/74128712-f1ca-4785-ab33-64f95078fc66.jpg';
 
 const LOGO_IMAGE =
   'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/beddb1c4-1163-4999-adbf-c5fd6f755b54.jpg';
@@ -208,10 +208,7 @@ const Index = () => {
       {/* Hero */}
       <section className="container grid items-center gap-8 py-12 md:grid-cols-2 md:py-20">
         <div className="animate-fade-in">
-          <span className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-accent-foreground">
-            <Icon name="Users" size={16} /> Сообщество заботливых мам
-          </span>
-          <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
+          <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
             Всё, что хотите знать{' '}
             <span className="font-display text-primary">о вашем ребёнке</span>
           </h1>
@@ -250,11 +247,11 @@ const Index = () => {
       </section>
 
       {/* Categories */}
-      <section id="feed" className="container py-6">
-        <div className="flex flex-wrap gap-2">
+      <section id="feed" className="container py-8">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setActiveCategory('all')}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+            className={`rounded-2xl px-6 py-3 text-base font-semibold transition ${
               activeCategory === 'all'
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/70'
@@ -266,13 +263,13 @@ const Index = () => {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+              className={`flex items-center gap-2.5 rounded-2xl px-6 py-3 text-base font-semibold transition ${
                 activeCategory === cat.id
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-secondary-foreground hover:bg-secondary/70'
               }`}
             >
-              <Icon name={cat.icon} size={16} />
+              <Icon name={cat.icon} size={20} />
               {cat.label}
             </button>
           ))}
@@ -296,23 +293,23 @@ const Index = () => {
             >
               <div className="mb-3 flex items-center justify-between">
                 <span
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${cat?.color}`}
+                  className={`flex items-center gap-2 rounded-2xl px-4 py-1.5 text-sm font-semibold ${cat?.color}`}
                 >
-                  <Icon name={cat?.icon || 'Tag'} size={13} />
+                  <Icon name={cat?.icon || 'Tag'} size={16} />
                   {cat?.label}
                 </span>
                 {post.status === 'pending' && (
-                  <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
-                    <Icon name="Clock" size={12} /> На проверке
+                  <span className="flex items-center gap-1.5 rounded-2xl bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700">
+                    <Icon name="Clock" size={14} /> На проверке
                   </span>
                 )}
               </div>
-              <h3 className="text-xl font-bold leading-snug">{post.title}</h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+              <h3 className="text-2xl font-bold leading-snug">{post.title}</h3>
+              <p className="mt-3 flex-1 text-base leading-relaxed text-muted-foreground">
                 {post.content}
               </p>
               <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
-                <span className="text-xs text-muted-foreground">{post.date}</span>
+                <span className="text-sm text-muted-foreground">{post.date}</span>
                 {isAuthor && (
                   <Button
                     variant="ghost"
