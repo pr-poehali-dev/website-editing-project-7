@@ -86,6 +86,9 @@ const Index = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [isAuthor, setIsAuthor] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState(false);
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -93,6 +96,18 @@ const Index = () => {
 
   const [qName, setQName] = useState('');
   const [qText, setQText] = useState('');
+
+  const handleLogin = () => {
+    if (loginPassword === 'Cokolovaandpolina=vrachi') {
+      setIsAuthor(true);
+      setLoginOpen(false);
+      setLoginPassword('');
+      setLoginError(false);
+      toast({ title: 'Добро пожаловать! 💚', description: 'Вы вошли в режим автора.' });
+    } else {
+      setLoginError(true);
+    }
+  };
 
   const openCreate = () => {
     setEditingId(null);
@@ -183,7 +198,7 @@ const Index = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-lg">
         <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer select-none" onDoubleClick={() => !isAuthor && setLoginOpen(true)}>
             <img src={LOGO_IMAGE} alt="Мамоград" className="h-11 w-11 rounded-2xl object-cover shadow-sm" />
             <span className="font-display text-3xl text-primary">Всё о малыше</span>
           </div>
@@ -456,6 +471,42 @@ const Index = () => {
             <Button onClick={handleSubmit} className="w-full rounded-full gap-2" size="lg">
               <Icon name="Send" size={18} />
               {editingId !== null ? 'Сохранить изменения' : 'Отправить на модерацию'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Login dialog for author */}
+      <Dialog open={loginOpen} onOpenChange={(open) => { setLoginOpen(open); setLoginPassword(''); setLoginError(false); }}>
+        <DialogContent className="rounded-3xl sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center">Вход для автора</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent">
+                <Icon name="Lock" size={28} className="text-accent-foreground" />
+              </div>
+            </div>
+            <div>
+              <Input
+                type="password"
+                placeholder="Введите пароль"
+                value={loginPassword}
+                onChange={(e) => { setLoginPassword(e.target.value); setLoginError(false); }}
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                className={loginError ? 'border-red-400 focus-visible:ring-red-400' : ''}
+              />
+              {loginError && (
+                <p className="mt-1.5 text-sm text-red-500 flex items-center gap-1">
+                  <Icon name="CircleAlert" size={14} /> Неверный пароль
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleLogin} className="w-full rounded-full gap-2" size="lg">
+              <Icon name="LogIn" size={18} /> Войти
             </Button>
           </DialogFooter>
         </DialogContent>
