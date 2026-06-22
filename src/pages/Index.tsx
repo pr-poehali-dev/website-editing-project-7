@@ -122,13 +122,16 @@ const Index = () => {
   };
 
   const handleSubmit = () => {
-    if (!form.author.trim() || !form.title.trim() || !form.category || !form.content.trim()) {
+    if (!form.title.trim() || !form.category || !form.content.trim()) {
       toast({
         title: 'Заполните все поля',
-        description: 'Имя, заголовок, раздел и текст обязательны.',
+        description: 'Заголовок, раздел и текст обязательны.',
         variant: 'destructive',
       });
       return;
+    }
+    if (!form.author.trim()) {
+      setForm((f) => ({ ...f, author: 'Автор' }));
     }
 
     if (editingId !== null) {
@@ -154,13 +157,13 @@ const Index = () => {
         category: form.category,
         title: form.title.trim(),
         content: form.content.trim(),
-        status: 'pending',
+        status: 'published',
         date: 'только что',
       };
       setPosts((prev) => [newPost, ...prev]);
       toast({
-        title: 'Пост отправлен на модерацию 🚀',
-        description: 'После проверки он появится в общей ленте.',
+        title: 'Пост опубликован 💚',
+        description: 'Пост появился в ленте.',
       });
     }
 
@@ -188,7 +191,9 @@ const Index = () => {
   };
 
   const visiblePosts = posts.filter(
-    (p) => activeCategory === 'all' || p.category === activeCategory
+    (p) =>
+      (isAuthor || p.status === 'published') &&
+      (activeCategory === 'all' || p.category === activeCategory)
   );
 
   const getCategory = (id: string) => CATEGORIES.find((c) => c.id === id);
@@ -430,14 +435,6 @@ const Index = () => {
           </DialogHeader>
           <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <div className="space-y-4 py-2">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Имя автора</label>
-              <Input
-                placeholder="Например, Анна"
-                value={form.author}
-                onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
-              />
-            </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium">Заголовок</label>
               <Input
