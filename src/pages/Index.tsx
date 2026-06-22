@@ -13,7 +13,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 const HERO_IMAGE =
-  'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/74128712-f1ca-4785-ab33-64f95078fc66.jpg';
+  'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/6c262dcc-d0f8-4f14-b585-7e714c676b1d.jpg';
 
 const LOGO_IMAGE =
   'https://cdn.poehali.dev/projects/558acf59-52cc-49bf-86a4-c54c112bdadd/files/beddb1c4-1163-4999-adbf-c5fd6f755b54.jpg';
