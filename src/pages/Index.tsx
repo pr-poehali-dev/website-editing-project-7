@@ -185,7 +185,7 @@ const Index = () => {
         <div className="container flex items-center justify-between py-4">
           <div className="flex items-center gap-2">
             <img src={LOGO_IMAGE} alt="Мамоград" className="h-11 w-11 rounded-2xl object-cover shadow-sm" />
-            <span className="font-display text-3xl text-primary">Мамоград</span>
+            <span className="font-display text-3xl text-primary">Всё о малыше</span>
           </div>
           <div className="flex items-center gap-2">
             {isAuthor ? (
@@ -200,11 +200,7 @@ const Index = () => {
                   Выйти
                 </Button>
               </>
-            ) : (
-              <Button variant="outline" className="rounded-full gap-2" onClick={() => setIsAuthor(true)}>
-                <Icon name="Lock" size={16} /> Вход для автора
-              </Button>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
@@ -316,13 +312,8 @@ const Index = () => {
                 {post.content}
               </p>
               <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-foreground">
-                    {post.author.charAt(0)}
-                  </div>
-                  <span className="text-sm font-medium">{post.author}</span>
-                </div>
-                {isAuthor ? (
+                <span className="text-xs text-muted-foreground">{post.date}</span>
+                {isAuthor && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -331,8 +322,6 @@ const Index = () => {
                   >
                     <Icon name="Pencil" size={14} /> Изменить
                   </Button>
-                ) : (
-                  <span className="text-xs text-muted-foreground">{post.date}</span>
                 )}
               </div>
             </article>
@@ -398,9 +387,9 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border bg-secondary/40">
         <div className="container flex flex-col items-center gap-2 py-10 text-center">
-          <span className="font-display text-2xl text-primary">Мамоград</span>
+          <span className="font-display text-2xl text-primary">Всё о малыше</span>
           <p className="text-sm text-muted-foreground">
-            Всё о малыше: уход, здоровье, развитие, питание
+            Мамочкам и папочкам: уход, здоровье, развитие, питание
           </p>
         </div>
       </footer>
